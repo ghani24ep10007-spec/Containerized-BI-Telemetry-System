@@ -1,4 +1,4 @@
-# 🚀 Final Project - Rizqi Ghani
+# 🚀Containerized BI & Telemetry System - Rizqi Ghani
 
 Berikut adalah sistem Final Project yang berjalan mandiri secara real-time:
 
