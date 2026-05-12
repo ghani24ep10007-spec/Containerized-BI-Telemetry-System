@@ -1,0 +1,74 @@
+services:
+  mysql-db:
+    image: mariadb:10.6
+    container_name: mysql-db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: app_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  web-app:
+    image: php:8.1-apache
+    container_name: web-app
+    restart: always
+    volumes:
+      - ./html:/var/www/html
+    entrypoint: ["sh", "-c", "docker-php-ext-install mysqli && apache2-foreground"]
+
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./npm/data:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+      - ./npm/logs:/data/logs
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+
+  mysql-exporter:
+    image: prom/mysqld-exporter
+    container_name: mysql-exporter
+    environment:
+      - DATA_SOURCE_NAME=root:rootpassword@(mysql-db:3306)/
+    depends_on:
+      - mysql-db
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: promtail
+    volumes:
+      - ./npm/logs:/var/log/npm
+      - ./promtail/config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+
+volumes:
+  mysql_data:

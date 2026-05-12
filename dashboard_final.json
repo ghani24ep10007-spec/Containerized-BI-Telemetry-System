@@ -1,0 +1,32 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "final_ghani_01",
+    "title": "Final Project - Rizqi Ghani",
+    "tags": [ "final" ],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "panels": [
+      {
+        "title": "CPU & RAM Usage (%)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "targets": [
+          { "expr": "avg(irate(node_cpu_seconds_total{mode!=\"idle\"}[5m])) * 100", "legendFormat": "CPU" },
+          { "expr": "100 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100)", "legendFormat": "RAM" }
+        ]
+      },
+      {
+        "title": "Nginx Proxy Logs (Habit Monitoring)",
+        "type": "logs",
+        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
+        "datasource": { "type": "loki", "uid": "loki" },
+        "targets": [ { "expr": "{job=\"npm\"}" } ],
+        "options": { "showTime": true, "sortOrder": "Descending" }
+      }
+    ]
+  },
+  "overwrite": true
+}
