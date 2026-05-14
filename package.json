@@ -1,0 +1,14 @@
+{
+  "name": "containerized-bi-telemetry-system",
+  "version": "1.0.0",
+  "description": "Contoh server full-stack sederhana dengan Node.js + Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node --check server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

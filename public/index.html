@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Stack Server Demo</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; max-width: 760px; }
+      h1 { margin-bottom: .25rem; }
+      .muted { color: #666; }
+      ul { padding-left: 1.2rem; }
+      li { margin-bottom: .4rem; }
+      form { margin-top: 1rem; display: flex; gap: .5rem; }
+      input { flex: 1; padding: .5rem; }
+      button { padding: .5rem .9rem; cursor: pointer; }
+      .ok { color: green; }
+      .err { color: #b00020; }
+    </style>
+  </head>
+  <body>
+    <h1>Server Full Stack</h1>
+    <p class="muted">Frontend (HTML/JS) terhubung ke Backend API (Express).</p>
+
+    <p id="health" class="muted">Cek status server...</p>
+
+    <h2>Todo List</h2>
+    <ul id="todoList"></ul>
+
+    <form id="todoForm">
+      <input id="todoInput" placeholder="Contoh: Integrasi database" required />
+      <button type="submit">Tambah</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+      const healthEl = document.getElementById('health');
+      const todoListEl = document.getElementById('todoList');
+      const formEl = document.getElementById('todoForm');
+      const inputEl = document.getElementById('todoInput');
+      const messageEl = document.getElementById('message');
+
+      async function loadHealth() {
+        try {
+          const res = await fetch('/api/health');
+          const data = await res.json();
+          healthEl.textContent = `Status: ${data.status} | Waktu server: ${data.time}`;
+          healthEl.className = 'ok';
+        } catch (err) {
+          healthEl.textContent = 'Gagal terhubung ke backend API.';
+          healthEl.className = 'err';
+        }
+      }
+
+      async function loadTodos() {
+        const res = await fetch('/api/todos');
+        const todos = await res.json();
+        todoListEl.innerHTML = '';
+        todos.forEach((todo) => {
+          const li = document.createElement('li');
+          li.textContent = `${todo.done ? '✅' : '⬜'} ${todo.title}`;
+          todoListEl.appendChild(li);
+        });
+      }
+
+      formEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageEl.textContent = '';
+
+        try {
+          const res = await fetch('/api/todos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: inputEl.value })
+          });
+
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Terjadi kesalahan.');
+          }
+
+          inputEl.value = '';
+          messageEl.textContent = 'Todo berhasil ditambahkan.';
+          messageEl.className = 'ok';
+          loadTodos();
+        } catch (err) {
+          messageEl.textContent = err.message;
+          messageEl.className = 'err';
+        }
+      });
+
+      loadHealth();
+      loadTodos();
+    </script>
+  </body>
+</html>
